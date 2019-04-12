@@ -1,0 +1,15 @@
+[Unit]
+Description=BitBox Base Middleware
+Requires=bitcoind.service
+Requires=lightningd.service
+Requires=electrs.service
+After=lightningd.service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/sbin/base-middleware
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
