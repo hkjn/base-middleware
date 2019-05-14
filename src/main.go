@@ -65,9 +65,7 @@ var upgrader = websocket.Upgrader{
 }
 
 func testCLightningRPC(lightningRpcPath string) string {
-	var ln *lightning.Client
-
-	ln = &lightning.Client{
+	ln := &lightning.Client{
 		Path: lightningRpcPath,
 	}
 
@@ -104,7 +102,10 @@ func main() {
 }
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "home")
+	_, err := w.Write([]byte("OK!!\n"))
+	if err != nil {
+		log.Print(err.Error())
+	}
 }
 
 func writer(info *middlewareInfoStruct) {
@@ -128,7 +129,7 @@ func echo() {
 		val := <-broadcast
 		blockinfo := fmt.Sprintf("%d %f %d %s", val.Blocks, val.Difficulty, i, val.LightningAlias)
 		// send to every client that is currently connected
-		fmt.Printf(blockinfo)
+		fmt.Println(blockinfo)
 		for client := range clients {
 			err := client.WriteMessage(websocket.TextMessage, []byte(blockinfo))
 			if err != nil {
