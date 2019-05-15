@@ -98,7 +98,7 @@ func main() {
 	go rpcLoop(*bitcoinRpcUser, *bitcoinRpcPassword, *bitcoinRpcPort, *lightningRpcPath)
 	go echo()
 
-	log.Fatal(http.ListenAndServe(":8844", router))
+	log.Fatal(http.ListenAndServe(":8845", router))
 }
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
@@ -140,3 +140,4 @@ func echo() {
 		}
 	}
 }
+
