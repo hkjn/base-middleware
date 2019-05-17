@@ -1,8 +1,5 @@
 [Unit]
 Description=BitBox Base Middleware
-Requires=bitcoind.service
-Requires=lightningd.service
-Requires=electrs.service
 After=lightningd.service
 
 [Service]

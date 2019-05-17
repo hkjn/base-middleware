@@ -17,7 +17,7 @@ import (
 )
 
 type middlewareInfoStruct struct {
-	Blocks         int32   `json:"blocks"`
+	Blocks         int64   `json:"blocks"`
 	Difficulty     float64 `json:"difficulty"`
 	LightningAlias string  `json:"alias"`
 }
@@ -32,7 +32,7 @@ func testBitcoinRPC(bitcoinRpcUser, bitcoinRpcPassword, bitcoinRpcPort string) m
 	}
 	client, err := rpcclient.New(&connCfg, nil)
 	if err != nil {
-		log.Fatalf("error creating new btc client: %v", err)
+		log.Printf("error creating new btc client: %v", err)
 	}
 	//client is shutdown/deconstructed again as soon as this function returns
 	defer client.Shutdown()
@@ -40,19 +40,23 @@ func testBitcoinRPC(bitcoinRpcUser, bitcoinRpcPassword, bitcoinRpcPort string) m
 	//Get current block count.
 	blockCount, err := client.GetBlockCount()
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Unable to get Block count: %s", err.Error())
+		blockCount = 0
 	}
 
 	blockChainInfo, err := client.GetBlockChainInfo()
+	var difficulty = 0.0
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Unable to get blockchaininfo: %s", err)
+	} else {
+		difficulty = blockChainInfo.Difficulty
 	}
 
 	log.Printf("Block count: %d", blockCount)
-	log.Printf("Blockchain info, blocks: %d, difficulty: %f", blockChainInfo.Blocks, blockChainInfo.Difficulty)
+	log.Printf("Blockchain info, blocks: %d, difficulty: %f", blockCount, difficulty)
 	var returnStruct middlewareInfoStruct
-	returnStruct.Blocks = blockChainInfo.Blocks
-	returnStruct.Difficulty = blockChainInfo.Difficulty
+	returnStruct.Blocks = blockCount
+	returnStruct.Difficulty = difficulty
 	return returnStruct
 }
 
@@ -70,11 +74,14 @@ func testCLightningRPC(lightningRpcPath string) string {
 	}
 
 	nodeinfo, err := ln.Call("getinfo")
+	var alias = "disconnected"
 	if err != nil {
-		log.Fatal("getinfo error: " + err.Error())
+		log.Printf("getinfo error: %s" + err.Error())
+	} else {
+		alias = nodeinfo.Get("alias").String()
 	}
-	log.Print(nodeinfo.Get("alias").String())
-	return nodeinfo.Get("alias").String()
+	log.Print(alias)
+	return alias
 }
 
 func rpcLoop(bitcoinRpcUser, bitcoinRpcPassword, bitcoinRpcPort, lightningRpcPath string) {
@@ -140,4 +147,3 @@ func echo() {
 		}
 	}
 }
-
